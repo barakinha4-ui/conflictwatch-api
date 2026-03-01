@@ -5,8 +5,8 @@ const router  = express.Router();
 
 const { requireAuth }                                    = require('../middleware/auth');
 const { validateSubscription }                           = require('../middleware/planGate');
-const { analysisRateLimit }                              = require('../middleware/rateLimit');
-const { analyzeGeopolitical }                            const { analyzeGeopolitical } = require('../services/ai');
+const { analysisRateLimit }                              = require('../middleware/rateLimit');       
+const { analyzeGeopolitical } = require('../services/ai');
 const { incrementAnalysisCount, saveAnalysis, supabaseAdmin } = require('../services/supabase');
 const { sendSuccess, sendError, asyncHandler }           = require('../utils/response');
 const { sanitizeAIQuery, validateLanguage }              = require('../utils/sanitize');
