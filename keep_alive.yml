@@ -1,0 +1,17 @@
+name: Keep Alive Render
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Executa a cada 10 minutos
+  workflow_dispatch: # Permite rodar manualmente para testar
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render API
+        run: |
+          # SUBSTITUA pela sua URL real do Render quando fizer o deploy
+          RENDER_URL="https://sua-api.onrender.com/health"
+          echo "Pinguando $RENDER_URL..."
+          curl -s -f $RENDER_URL || echo "Falha ao pinguar ou site offline"
