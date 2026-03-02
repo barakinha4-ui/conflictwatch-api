@@ -71,6 +71,51 @@ router.post(
     });
   })
 );
+// ── POST /api/analysis/chat ───────────────────────────────────
+// Alias de /api/analysis — usado pelo frontend no chat de IA
+router.post(
+  '/chat',
+  requireAuth,
+  validateSubscription,
+  analysisRateLimit,
+  asyncHandler(async (req, res) => {
+    const { query: rawQuery, language: rawLang } = req.body;
+
+    const query = sanitizeAIQuery(rawQuery);
+    const language = validateLanguage(rawLang || req.profile.preferred_language);
+
+    if (!query || query.length < 5) {
+      return sendError(res, 400, 'Query muito curta ou inválida');
+    }
+
+    const { profile } = req;
+
+    const allowed = await incrementAnalysisCount(profile.id, profile.plan);
+    if (!allowed) {
+      return res.status(429).json({
+        success: false,
+        error: `Limite de ${FREE_DAILY_LIMIT} análises por dia atingido no plano FREE.`,
+        limit: FREE_DAILY_LIMIT,
+        used: profile.ai_analyses_today,
+        upgrade_url: `${process.env.APP_URL}/pricing`,
+      });
+    }
+
+    const result = await analyzeGeopolitical(query, language);
+
+    saveAnalysis(profile.id, query, result.text, language, result.totalTokens).catch(() => {});
+
+    return sendSuccess(res, {
+      text: result.text,
+      language,
+      usage: {
+        analyses_today: profile.ai_analyses_today + 1,
+        limit: profile.plan === 'pro' ? null : FREE_DAILY_LIMIT,
+        plan: profile.plan,
+      },
+    });
+  })
+);
 
 // ── GET /api/analysis/history ─────────────────────────────────
 // Histórico de análises do usuário (PRO: tudo | FREE: últimas 5)
