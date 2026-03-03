@@ -1,6 +1,6 @@
 'use strict';
 
-const cron   = require('node-cron');
+const { classifyNewsEvent, translateNewsTitle } = require('../services/gemini');
 const logger = require('../utils/logger');
 const { fetchLatestNews }                          = require('../services/news');
 const { classifyNewsEvent, translateNewsTitle }    = require('../services/claude');
